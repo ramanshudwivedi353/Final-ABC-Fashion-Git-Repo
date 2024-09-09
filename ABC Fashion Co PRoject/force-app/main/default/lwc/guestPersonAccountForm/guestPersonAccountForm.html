@@ -1,0 +1,52 @@
+<template>
+    <lightning-card title="Customer Profile" icon-name="standard:person_account">
+        <div class="slds-p-around_medium">
+            <!-- Show spinner while data is loading -->
+            <lightning-spinner if:true={isLoading}></lightning-spinner>
+
+            <!-- Error message display -->
+            <template if:true={errorMessage}>
+                <p class="slds-text-color_error">{errorMessage}</p>
+            </template>
+
+            <!-- Success message when form is submitted -->
+            <template if:true={formSubmitted}>
+                <p class="slds-text-color_success">Your profile has been updated successfully!</p>
+            </template>
+
+            <!-- Form to display and edit person account details -->
+            <template if:true={personAccount.Id} if:false={formSubmitted}>
+                <lightning-input required="true" name="FirstName" label="First Name" type="text" value={personAccount.FirstName} onchange={handleInputChange}></lightning-input>
+                <lightning-input required="true" name="LastName" label="Last Name" type="text" value={personAccount.LastName} onchange={handleInputChange}></lightning-input>
+                <lightning-input required="true" name="Phone" label="Phone" type="tel" value={personAccount.Phone} onchange={handleInputChange}></lightning-input>
+                <lightning-input required="true" name="PersonEmail" label="Email" type="email" value={personAccount.PersonEmail} onchange={handleInputChange}></lightning-input>
+                <lightning-input required="true" name="Customer_Date_Of_Birth__c" label="Customer Date Of Birth" type="date" value={personAccount.Customer_Date_Of_Birth__c} onchange={handleInputChange}></lightning-input>
+
+                <!-- T-Shirt Size Picklist -->
+                <lightning-combobox
+                    required="true"
+                    name="T_shirt_size__c"
+                    label="T-Shirt Size"
+                    value={personAccount.T_shirt_size__c}
+                    placeholder="Select T-Shirt Size"
+                    options={tshirtSizeOptions}
+                    onchange={handleInputChange}>
+                </lightning-combobox>
+
+                <!-- Shoe Size Picklist -->
+                <lightning-combobox
+                    required="true"
+                    name="Shoe_size__c"
+                    label="Shoe Size"
+                    value={personAccount.Shoe_size__c}
+                    placeholder="Select Shoe Size"
+                    options={shoeSizeOptions}
+                    onchange={handleInputChange}>
+                </lightning-combobox>
+                
+                <!-- Save button -->
+                <lightning-button class="slds-m-top_medium" label="Save" onclick={handleSave}></lightning-button>
+            </template>
+        </div>
+    </lightning-card>
+</template>

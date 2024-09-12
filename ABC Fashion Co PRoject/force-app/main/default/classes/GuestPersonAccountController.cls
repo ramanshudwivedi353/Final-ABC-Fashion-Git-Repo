@@ -1,5 +1,6 @@
 global without sharing class GuestPersonAccountController {
 
+    Public static boolean isUpdateDone = false;
     // Method to get Person Account record by token
     @AuraEnabled
     global static Account getPersonAccount(String token) {
@@ -61,6 +62,7 @@ global without sharing class GuestPersonAccountController {
     // FUTURE METHOD for sending Loyalty Information asynchronously
     @future(callout=true)
     public static void sendLoyaltyInformation(List<Id> accountIds) {
+        system.debug('inside future method');
         if (accountIds == null || accountIds.isEmpty()) {
             System.debug('No account IDs provided.');
             return;
@@ -68,7 +70,7 @@ global without sharing class GuestPersonAccountController {
 
         List<Account> updatedAccounts = [SELECT Id, PersonEmail, T_shirt_size__c, Shoe_size__c FROM Account WHERE Id IN :accountIds];
         Http http = new Http();
-
+		
         for (Account updatedAccount : updatedAccounts) {
             try {
                 // Prepare the request body for each account
@@ -88,7 +90,7 @@ global without sharing class GuestPersonAccountController {
 
                 // Send the request
                 HttpResponse res = http.send(req);
-
+				
                 if (res.getStatusCode() == 200) {
                     // Parse the response if successful
                     Map<String, Object> resMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
@@ -96,7 +98,7 @@ global without sharing class GuestPersonAccountController {
 
                     if (resMap.get('status') == 'success' && resMap.containsKey('customer_id')) {
                         updatedAccount.Loyalty_Customer_ID__c = String.valueOf(resMap.get('customer_id'));
-                        update updatedAccount; // Save the Loyalty Customer ID
+                        system.debug('updatedAccount====>'+ JSON.serialize(updatedAccount));
                     } else {
                         System.debug('Error in response: ' + JSON.serialize(res.getBody()));
                     }
@@ -107,5 +109,11 @@ global without sharing class GuestPersonAccountController {
                 System.debug('Error sending loyalty information: ' + e.getMessage());
             }
         }
+        if(isUpdateDone == false){
+            isUpdateDone = true;
+            system.debug('JSON.serialize(updatedAccounts)===>'+JSON.serialize(updatedAccounts));
+            update updatedAccounts; // Save the Loyalty Customer ID
+        }
+         
     }
 }
